@@ -77,7 +77,7 @@ public class TestAuthenticationHandler(
 		{
 			return Task.FromResult(AuthenticateResult.Fail("Missing Authorization header"));
 		}
-        var identity = new GenericIdentity("test", "test");
+        var identity = new ClaimsIdentity([new Claim("key", "value")], "Test");
 		return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), null, "Test")));
 	}
 }
