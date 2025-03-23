@@ -5,6 +5,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Sample.Api.HealthChecks;
 using Sample.Api.Middleware;
 using Sample.Infrastructure.EntityFramework;
@@ -43,6 +47,22 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
         {
             http.AddStandardResilienceHandler();
         });
+        services.AddOpenTelemetry()
+            .ConfigureResource(resource => resource.AddService("SampleApiWithOutbox"))
+            .WithTracing(tracing => tracing
+                .AddHttpClientInstrumentation()
+                .AddAspNetCoreInstrumentation())
+            .WithMetrics(metrics => metrics
+                .AddHttpClientInstrumentation()
+                .AddAspNetCoreInstrumentation()
+                .AddRuntimeInstrumentation())
+            .UseOtlpExporter();
+        
+        services.AddLogging(builder => builder.AddOpenTelemetry(options =>
+        {
+            options.IncludeScopes = true;
+            options.IncludeFormattedMessage = true;
+        }));
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, MessageDbContext dbContext)
