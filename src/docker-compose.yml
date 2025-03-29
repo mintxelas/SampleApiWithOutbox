@@ -1,0 +1,31 @@
+services:
+  sample.api:
+    image: ${DOCKER_REGISTRY-}devsampleapi
+    build:
+      context: .
+      dockerfile: Sample.Api/Dockerfile
+    ports:
+      - 5000:8080
+      - 5001:8081
+    environment:
+      # Aspire Dashboard
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://devhabit.aspire-dashboard:18889
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+
+  sample.postgres:
+    image: postgres:17.2 # or latest
+    environment:
+      POSTGRES_DB: sample
+      POSTGRES_USER: psqladmin
+      POSTGRES_PASSWORD: 12345ABC
+    volumes:
+      - ./.containers/postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  sample.aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+    environment:
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: true
+    ports:
+      - 18888:18888
