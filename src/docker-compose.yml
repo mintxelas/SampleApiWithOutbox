@@ -1,13 +1,13 @@
 services:
-  sample.api:
-    image: ${DOCKER_REGISTRY-}sampleapi
+  api:
+    image: ${DOCKER_REGISTRY-}api
     build:
-      context: ../
+      context: .
       dockerfile: src/Api/Dockerfile
     ports:
-      - 5000:8080
-      - 5001:8081
+      - 5100:8080
     environment:
+      - IDP__Audience=http://idp:5300
       # Aspire Dashboard
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
@@ -15,12 +15,14 @@ services:
   bff:
     image: ${DOCKER_REGISTRY-}bff
     build:
-      context: ../
+      context: .
       dockerfile: src/Front/Dockerfile
     ports:
-      - 5000:8080
-      - 5001:8081
+      - 5200:8080
     environment:
+      - IDP__Audience=http://idp:5300
+      - IDP__Secret=secret
+      - BackendAPI=http://api:5100
       # Aspire Dashboard
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
@@ -28,12 +30,13 @@ services:
   idp:
     image: ${DOCKER_REGISTRY-}idp
     build:
-      context: ../
+      context: .
       dockerfile: src/Idsrv4/Dockerfile
     ports:
-      - 5000:8080
-      - 5001:8081
+      - 5300:8080
     environment:
+      - Frontend=http://bff:5200
+      - BackendAPI__Secret=secret
       # Aspire Dashboard
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc

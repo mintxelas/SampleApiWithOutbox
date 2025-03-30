@@ -1,21 +1,14 @@
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text.Json;
 using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace Idsrv4
 {
-    public class Startup
+    public class Startup(IConfiguration configuration)
     {
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
@@ -48,9 +41,9 @@ namespace Idsrv4
                         ClientId = "internal-api",
                         ClientName = "Interactive client with short token lifetime (Code with PKCE)",
 
-                        RedirectUris = { "https://localhost:5200/signin-oidc" },
+                        RedirectUris = { $"{configuration["Frontend"]}/signin-oidc" },
 
-                        ClientSecrets = { new Secret("secret".Sha256()) },
+                        ClientSecrets = { new Secret(configuration["BackendAPI:Secret"].Sha256()) },
                         RequireConsent = false,
 
                         AllowedGrantTypes = GrantTypes.Code,
@@ -94,7 +87,6 @@ namespace Idsrv4
                 .AddDeveloperSigningCredential(persistKey: false);
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -111,7 +103,7 @@ namespace Idsrv4
                 endpoints.MapDefaultControllerRoute();
             });
             
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
         }
     }
 }

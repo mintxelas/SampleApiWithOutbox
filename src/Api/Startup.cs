@@ -1,10 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -27,7 +22,7 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.Authority = "https://localhost:5100";
+                options.Authority = configuration["IDP:Authority"];
                 options.Audience = "internal-api";
                 options.IncludeErrorDetails = environment.IsDevelopment();
             });
@@ -88,6 +83,6 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
         app.UseSubscriptions();
         app.UseMiddleware<LogContextMiddleware>();
         
-        app.UseHttpsRedirection();
+        //app.UseHttpsRedirection();
     }
 }
