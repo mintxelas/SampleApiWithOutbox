@@ -1,26 +1,32 @@
 services:
   api:
-    image: ${DOCKER_REGISTRY-}api
+    image: localhost/api:latest
     build:
       context: .
       dockerfile: src/Api/Dockerfile
     ports:
       - 5100:8080
     environment:
-      - IDP__Audience=http://idp:5300
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_ENVIRONMENT=Development
+      - IDP__Authority=http://idp:5300
       # Aspire Dashboard
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+    volumes:
+      - ./data:/database
       
   bff:
-    image: ${DOCKER_REGISTRY-}bff
+    image: localhost/bff:latest
     build:
       context: .
       dockerfile: src/Front/Dockerfile
     ports:
       - 5200:8080
     environment:
-      - IDP__Audience=http://idp:5300
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_ENVIRONMENT=Development
+      - IDP__Authority=http://idp:5300
       - IDP__Secret=secret
       - BackendAPI=http://api:5100
       # Aspire Dashboard
@@ -28,13 +34,15 @@ services:
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
         
   idp:
-    image: ${DOCKER_REGISTRY-}idp
+    image: localhost/idp:latest
     build:
       context: .
       dockerfile: src/Idsrv4/Dockerfile
     ports:
       - 5300:8080
     environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_ENVIRONMENT=Development
       - Frontend=http://bff:5200
       - BackendAPI__Secret=secret
       # Aspire Dashboard

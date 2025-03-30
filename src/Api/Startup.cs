@@ -25,6 +25,7 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
                 options.Authority = configuration["IDP:Authority"];
                 options.Audience = "internal-api";
                 options.IncludeErrorDetails = environment.IsDevelopment();
+                options.RequireHttpsMetadata = !environment.IsDevelopment();
             });
         services.AddControllers();
         services.AddCommandHandlers();
@@ -50,8 +51,7 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
             .WithMetrics(metrics => metrics
                 .AddHttpClientInstrumentation()
                 .AddAspNetCoreInstrumentation()
-                .AddRuntimeInstrumentation())
-            .UseOtlpExporter();
+                .AddRuntimeInstrumentation());
         
         services.AddLogging(builder => builder.AddOpenTelemetry(options =>
         {
@@ -82,7 +82,5 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
 
         app.UseSubscriptions();
         app.UseMiddleware<LogContextMiddleware>();
-        
-        //app.UseHttpsRedirection();
     }
 }

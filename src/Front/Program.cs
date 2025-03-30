@@ -33,6 +33,7 @@ internal class Program
             })
             .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
             {
+                options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
                 options.Authority = builder.Configuration["IDP:Authority"];
                 options.ClientId = "internal-api";
                 options.ClientSecret = builder.Configuration["IDP:Secret"];
@@ -59,8 +60,7 @@ internal class Program
             .WithMetrics(metrics => metrics
                 .AddHttpClientInstrumentation()
                 .AddAspNetCoreInstrumentation()
-                .AddRuntimeInstrumentation())
-            .UseOtlpExporter();
+                .AddRuntimeInstrumentation());
 
         builder.Logging.AddOpenTelemetry(options =>
         {
@@ -112,7 +112,6 @@ internal class Program
         app.MapStaticAssets();
         app.MapRazorPages()
             .WithStaticAssets();
-        //app.UseHttpsRedirection();
 
         app.Run();
     }
