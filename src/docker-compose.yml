@@ -6,15 +6,22 @@ services:
       dockerfile: src/Api/Dockerfile
     ports:
       - 5100:8080
+      - 5101:8081
     environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=12345.aa
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_ENVIRONMENT=Development
       - DOTNET_ENVIRONMENT=Development
-      - IDP__Authority=http://idp:5300
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - IDP__Authority=https://idp:5301
       # Aspire Dashboard
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
     volumes:
       - ./data:/database
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ./.aspnet/https:/home/app/.aspnet/https:ro
       
   bff:
     image: localhost/bff:latest
@@ -23,16 +30,24 @@ services:
       dockerfile: src/Front/Dockerfile
     ports:
       - 5200:8080
+      - 5201:8081
     environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=12345.aa
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_ENVIRONMENT=Development
       - DOTNET_ENVIRONMENT=Development
-      - IDP__Authority=http://idp:5300
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - IDP__Authority=https://idp:5301
       - IDP__Secret=secret
-      - BackendAPI=http://api:5100
+      - BackendAPI=https://api:5101
       # Aspire Dashboard
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-        
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ./.aspnet/https:/home/app/.aspnet/https:ro
+      
   idp:
     image: localhost/idp:latest
     build:
@@ -40,14 +55,22 @@ services:
       dockerfile: src/Idsrv4/Dockerfile
     ports:
       - 5300:8080
+      - 5301:8081
     environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=12345.aa
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_ENVIRONMENT=Development
       - DOTNET_ENVIRONMENT=Development
-      - Frontend=http://bff:5200
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - Frontend=https://bff:5201
       - BackendAPI__Secret=secret
       # Aspire Dashboard
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ./.aspnet/https:/home/app/.aspnet/https:ro   
 
   aspire-dashboard:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0

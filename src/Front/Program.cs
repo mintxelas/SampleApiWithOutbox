@@ -113,6 +113,7 @@ internal class Program
         app.MapRazorPages()
             .WithStaticAssets();
 
+        app.UseHttpsRedirection();
         app.Run();
     }
 }

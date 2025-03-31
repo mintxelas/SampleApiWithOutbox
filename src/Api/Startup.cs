@@ -82,5 +82,6 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
 
         app.UseSubscriptions();
         app.UseMiddleware<LogContextMiddleware>();
+        app.UseHttpsRedirection();
     }
 }

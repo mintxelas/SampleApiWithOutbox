@@ -103,7 +103,7 @@ namespace Idsrv4
                 endpoints.MapDefaultControllerRoute();
             });
             
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
         }
     }
 }
